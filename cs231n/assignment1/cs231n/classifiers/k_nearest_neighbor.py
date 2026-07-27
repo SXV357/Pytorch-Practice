@@ -1,5 +1,6 @@
 from builtins import range
 from builtins import object
+import math
 import numpy as np
 from past.builtins import xrange
 
@@ -64,11 +65,17 @@ class KNearestNeighbor(object):
           is the Euclidean distance between the ith test point and the jth training
           point.
         """
-        num_test = X.shape[0]
-        num_train = self.X_train.shape[0]
+        num_test = X.shape[0] # 500
+        num_train = self.X_train.shape[0] # 5000
         dists = np.zeros((num_test, num_train))
+
         for i in range(num_test):
             for j in range(num_train):
+                curr_test = X[i]
+                curr_train = self.X_train[j]
+
+                distance = math.sqrt(sum(pow(curr_test[k] - curr_train[k], 2)) for k in range(len(curr_test)))
+                dists[i][j] = distance
                 #####################################################################
                 # TODO:                                                             #
                 # Compute the l2 distance between the ith test point and the jth    #
