@@ -1,4 +1,5 @@
 venv
 *.pth
+*.pyc
 data/
 __pycache__/
