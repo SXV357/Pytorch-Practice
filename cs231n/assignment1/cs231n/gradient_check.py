@@ -110,6 +110,9 @@ def grad_check_sparse(f, x, analytic_grad, num_checks=10, h=1e-5):
     """
     sample a few random elements and only return numerical
     in this dimensions.
+
+    function receives original weight matrix
+    we nudge a random weight up, evaluate loss then nudge down, eval loss then reset
     """
 
     for i in range(num_checks):
