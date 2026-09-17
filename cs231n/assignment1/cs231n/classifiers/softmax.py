@@ -82,10 +82,13 @@ def softmax_loss_naive(W, X, y, reg):
         dl_dscores = p - Y
         dscores_dw = X[i]
 
+        # newaxis mainly to align dimensions and get it to (3073, 10)
         dW += dscores_dw[:, np.newaxis].dot(dl_dscores[np.newaxis, :])
 
     # normalized hinge loss plus regularization
     # fit the data but balance it with keeping weights small
+
+    # W * W is el wise multiplication (add every squared entry into one scalar)
     loss = (loss / num_train) + (reg * np.sum(W * W))
 
     # derivative of (lambda * W^2 -> 2 * lambda * W)
@@ -104,6 +107,17 @@ def softmax_loss_vectorized(W, X, y, reg):
     loss = 0.0
     dW = np.zeros_like(W)
 
+    '''
+    W = (3073, 10)
+    X = (500, 3073)
+    y = (500,)
+    
+    X * W = (500, 10) raw scores
+
+    subtract max from every row, softmax then log then extract which we'll add to sum
+    '''
+
+    num_train = X.shape[0]
 
     #############################################################################
     # TODO:                                                                     #
@@ -111,6 +125,23 @@ def softmax_loss_vectorized(W, X, y, reg):
     # result in loss.                                                           #
     #############################################################################
 
+    # gives (500 x 10)
+    dot = X @ W
+
+    # doing this job: scores -= np.max(scores)
+    maxes = np.max(dot, axis=1)
+    align = dot - maxes[:, np.newaxis]
+
+    # softmax-related
+    exponentiate = np.exp(align)
+    exponentiated_sum = np.sum(exponentiate, axis=1)
+    softmax = exponentiate / exponentiated_sum[:, np.newaxis]
+
+    # softmax.shape = (500, 10)
+    prob_correct_classes = softmax[np.arange(softmax.shape[0]), y]
+
+    logged = -np.log(prob_correct_classes)
+    loss += np.sum(logged)
 
     #############################################################################
     # TODO:                                                                     #
@@ -122,5 +153,15 @@ def softmax_loss_vectorized(W, X, y, reg):
     # loss.                                                                     #
     #############################################################################
 
+    # calculating gradient
+    Y = np.zeros_like(softmax)
+    Y[np.arange(num_train), y] = 1.0    
+
+    dl_scores = softmax - Y
+    dW = X.T @ dl_scores
+
+    # apply regularization for loss and gradient 
+    loss = (loss / num_train) + (reg * np.sum(W * W))
+    dW = (dW / num_train) + (2 * reg * W)
 
     return loss, dW

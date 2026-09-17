@@ -111,13 +111,15 @@ def grad_check_sparse(f, x, analytic_grad, num_checks=10, h=1e-5):
     sample a few random elements and only return numerical
     in this dimensions.
 
-    function receives original weight matrix
+    function receives original weight matrix (x = W)
     we nudge a random weight up, evaluate loss then nudge down, eval loss then reset
     """
 
     for i in range(num_checks):
+        # still only picks one random weight (single scalar value)
         ix = tuple([randrange(m) for m in x.shape])
 
+        # textbook definition of derivative: f'(x) = lim_{h->0} (f(x+h) - f(x-h)) / 2h
         oldval = x[ix]
         x[ix] = oldval + h  # increment by h
         fxph = f(x)  # evaluate f(x + h)
